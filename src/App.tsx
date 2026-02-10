@@ -184,9 +184,13 @@ export default function App() {
   const [noSwapped, setNoSwapped] = useState(false);
 
   useEffect(() => {
-    const target = "aaditirammohan9@gmail.com";
+    const targets = [
+      "aaditirammohan9@gmail.com",
+      "f20220263@dubai.bits-pilani.ac.in",
+    ];
     const unlocked = !!localStorage.getItem("crimson-unlocked");
-    if (session?.user?.email?.toLowerCase() === target && !unlocked) {
+    const email = session?.user?.email?.toLowerCase() ?? "";
+    if (targets.includes(email) && !unlocked) {
       setLocked(true);
     } else {
       setLocked(false);
