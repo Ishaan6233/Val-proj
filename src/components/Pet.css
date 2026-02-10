@@ -1,0 +1,126 @@
+.pet{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 120px;
+  height: 80px;
+  pointer-events: auto;
+  z-index: 900;
+  transform-origin: center center;
+  transition: transform 120ms linear;
+}
+
+.pet .bubble{
+  position: absolute;
+  right: 100%;
+  top: -10px;
+  font-size: 18px;
+  opacity: 0;
+  transform-origin: right center;
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
+.pet.sleeping .bubble{ opacity: 1; transform: translateX(-6px);} 
+
+.pet-svg{ display:block; }
+
+.bunny-body .body{ fill: #ffeedd; stroke:#e3cdb6; stroke-width:1 }
+.bunny-body .tail{ fill:#ffffff; stroke:#e3cdb6 }
+.bunny-body .face{ fill:#ffeedd; stroke:#e3cdb6 }
+.bunny-body .ear{ fill:#ffeedd; stroke:#e3cdb6 }
+.bunny-body .nose{ fill:#ffb6c1 }
+.bunny-body .eye{ fill:#2b2b2b }
+
+/* Facing */
+.pet.left{ transform-origin: center center; }
+.pet.right .pet-svg{ transform: scaleX(1); }
+.pet.left .pet-svg{ transform: scaleX(-1); }
+
+/* Idle subtle breathing */
+.pet.idle .bunny-body .body{ animation: breathe 2200ms ease-in-out infinite }
+@keyframes breathe{ 0%{ transform: translateY(0)} 50%{ transform: translateY(-2px)} 100%{ transform: translateY(0)}}
+
+/* Walking leg animation */
+.pet.walking .leg.front, .pet.walking .leg.back{
+  animation: walk 360ms ease-in-out infinite;
+}
+.pet.running .leg.front, .pet.running .leg.back{
+  animation: run 160ms linear infinite;
+}
+@keyframes walk{ 0%{ transform: translateY(0)} 50%{ transform: translateY(4px)} 100%{ transform: translateY(0)} }
+@keyframes run{ 0%{ transform: translateY(0)} 50%{ transform: translateY(6px)} 100%{ transform: translateY(0)} }
+
+/* Play - roll/spin */
+.pet.playing{ animation: playRoll 900ms ease-in-out infinite; }
+@keyframes playRoll{ 0%{ transform: rotate(0deg)} 50%{ transform: rotate(8deg)} 100%{ transform: rotate(0deg)} }
+
+/* Sleeping eyes closed */
+.pet.sleeping .eye{ opacity: 0 }
+.pet.sleeping .head{ transform-origin: center; animation: sleepBob 1800ms ease-in-out infinite }
+@keyframes sleepBob{ 0%{ transform: translateY(0)} 50%{ transform: translateY(3px)} 100%{ transform: translateY(0)} }
+
+/* Eating pose */
+.pet.eating .head{ transform: translateY(3px) }
+.pet.eating .eye{ opacity: 0.7 }
+.pet.eating .nose{ transform: translateY(2px) }
+
+.food-bowl{
+  position: absolute;
+  left: 22px;
+  bottom: -2px;
+  width: 34px;
+  height: 14px;
+  border-radius: 0 0 16px 16px;
+  background: #f8c6a7;
+  border: 2px solid #d69b7b;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.18);
+}
+.food-bowl::before{
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: -8px;
+  width: 22px;
+  height: 10px;
+  border-radius: 12px 12px 8px 8px;
+  background: #ffd7b5;
+  border: 2px solid #d69b7b;
+}
+
+/* Cat-specific styling */
+.cat-body .body{ fill:#efe6d9; stroke:#cdbfa6; stroke-width:1 }
+.cat-body .face{ fill:#efe6d9; stroke:#cdbfa6 }
+.cat-body .ear{ fill:#efe6d9; stroke:#cdbfa6 }
+.cat-body .eye{ fill:#2b2b2b }
+.cat-body .tail path{ stroke:#cdbfa6 }
+.cat-body .whiskers{ opacity:0.9 }
+.cat-body .tail{ transform-origin: 60% 60%; }
+.pet.running .cat-body .tail{ animation: tailWag 300ms linear infinite }
+@keyframes tailWag{ 0%{ transform: rotate(0deg)} 50%{ transform: rotate(8deg)} 100%{ transform: rotate(0deg)} }
+
+/* Provide a small shadow under the pet */
+.pet::after{
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -6px;
+  width: 64px;
+  height: 10px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.18), rgba(0,0,0,0));
+  filter: blur(2px);
+  transform-origin: center;
+}
+
+/* Make interactions more accessible */
+.pet{ cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce){
+  .pet, .pet *{ animation: none !important; transition: none !important }
+}
+
+/* Smaller pet on very small screens */
+@media (max-width:420px){
+  .pet{ width:88px; height:64px }
+  .pet-svg{ width:88px; height:64px }
+  .pet::after{ left:8px; width:48px }
+}

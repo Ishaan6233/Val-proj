@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Case of the Crimson Locket</title>
+  <meta name="description" content="A short pre-landing mystery puzzle — solve to unlock." />
+  <style>
+    /* Crimson Locket — single-file puzzle
+       Noir / typewriter vibe, mobile-friendly, no external resources. */
+
+    :root{
+      --bg:#0b0b0d; /* near-black */
+      --panel:#141416; /* card */
+      --accent:#b32d2d; /* crimson */
+      --muted:#9aa0a6;
+      --glass: rgba(255,255,255,0.02);
+      --ease: cubic-bezier(.2,.9,.3,1);
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;font-family: Georgia, 'Times New Roman', serif;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(179,45,45,0.06), transparent),
+                  linear-gradient(180deg, var(--bg), #060607);
+      color:#efecec; -webkit-font-smoothing:antialiased;
+      display:flex;align-items:center;justify-content:center;
+      padding:28px;
+    }
+
+    .wrap{width:100%;max-width:880px}
+    header{display:flex;gap:18px;align-items:center;margin-bottom:18px}
+    .logo{
+      width:60px;height:60px;border-radius:8px;background:linear-gradient(180deg,#2b2b2b 0%, #111 100%);
+      display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6) inset;
+      font-weight:700;color:var(--accent);font-size:20px;
+    }
+
+    h1{font-size:22px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:14px}
+
+    main.card{background:linear-gradient(180deg,var(--panel), #0d0d0f);padding:20px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+
+    @media (max-width:880px){.grid{grid-template-columns:1fr;}}
+
+    /* Clues list */
+    .clues{background:var(--glass);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.02)}
+    .clue{padding:10px;border-radius:6px;margin-bottom:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);}
+    .clue h4{margin:0;font-size:14px;color:var(--accent)}
+    .clue p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* Inputs */
+    form{display:flex;flex-direction:column;gap:12px}
+    label{display:flex;flex-direction:column;font-size:13px;color:var(--muted)}
+    input[type=text]{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:6px;color:#fff;font-family:monospace;font-size:14px}
+
+    .actions{display:flex;gap:10px;align-items:center}
+    button{background:var(--accent);border:none;padding:10px 14px;border-radius:7px;color:#fff;font-weight:700;cursor:pointer;transition:transform 160ms var(--ease),box-shadow 160ms var(--ease)}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
+    button:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(179,45,45,0.14)}
+
+    .hint{color:var(--muted);font-size:13px}
+    .status{min-height:22px;color:var(--accent);font-weight:700}
+
+    /* Decoding reveal */
+    .reveal{margin-top:8px;font-size:20px;letter-spacing:0.4px;opacity:0;transform:translateY(8px);transition:opacity 420ms var(--ease),transform 420ms var(--ease)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* Buttons container */
+    .choice-wrap{display:flex;gap:12px;margin-top:14px;align-items:center}
+    .choice-wrap.swapped{flex-direction:row-reverse}
+    .choice-wrap button.swap-fun{width:110px}
+
+    /* playful swap animation when 'No' is clicked */
+    .choice-wrap button{transition:transform 260ms var(--ease),margin 200ms var(--ease)}
+
+    /* protected area */
+    .protected{margin-top:18px;padding:14px;border-radius:8px;background:#081217;border:1px solid rgba(255,255,255,0.02);display:none}
+    .protected.visible{display:block;animation:fadeIn 600ms var(--ease) both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+    /* small touches */
+    .small{font-size:12px;color:var(--muted)}
+
+    /* validation shake */
+    .shake{animation:shake 420ms cubic-bezier(.36,.07,.19,.97)}
+    @keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-6px)}60%{transform:translateX(6px)}100%{transform:translateX(0)}}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🔍</div>
+      <div>
+        <h1>The Case of the Crimson Locket</h1>
+        <p class="lead">A brief pre-landing mystery. Solve the five clues to unlock the invitation.</p>
+      </div>
+    </header>
+
+    <main class="card">
+      <div class="grid">
+        <section class="clues" aria-labelledby="clues-heading">
+          <h2 id="clues-heading" style="font-size:16px;margin:0 0 8px;color:var(--accent)">Evidence</h2>
+
+          <!-- Five atmospheric evidence descriptions for A–E -->
+          <article class="clue" data-key="A">
+            <h4>Evidence A</h4>
+            <p>A small scrap of song lyrics — the refrain repeats, steady and bright, like a promise.</p>
+          </article>
+
+          <article class="clue" data-key="B">
+            <h4>Evidence B</h4>
+            <p>A smudged note that looks like an answer to a question you meant to ask at midnight.</p>
+          </article>
+
+          <article class="clue" data-key="C">
+            <h4>Evidence C</h4>
+            <p>The initials tucked behind a lock of hair — brief, tender, and certain.</p>
+          </article>
+
+          <article class="clue" data-key="D">
+            <h4>Evidence D</h4>
+            <p>A tiny metal tag, warm from being held; it reads like a declaration, short and dear.</p>
+          </article>
+
+          <article class="clue" data-key="E">
+            <h4>Evidence E</h4>
+            <p>A longer inscription around the locket's rim — a single word that feels like home.</p>
+          </article>
+
+          <p class="small">Tips: Answers are short, capital-letters only. The encoded forms are not shown — the thrill is in the deduction.</p>
+        </section>
+
+        <aside>
+          <form id="puzzle-form" autocomplete="off" novalidate>
+            <fieldset style="border:none;padding:0;margin:0">
+              <legend class="small" style="margin-bottom:6px;color:var(--muted)">Enter the evidence codes</legend>
+
+              <label>Evidence A
+                <input type="text" id="a" maxlength="6" inputmode="latin" placeholder="e.g. VHKK" aria-label="Evidence A" />
+              </label>
+              <label>Evidence B
+                <input type="text" id="b" maxlength="6" inputmode="latin" placeholder="e.g. XNT" aria-label="Evidence B" />
+              </label>
+              <label>Evidence C
+                <input type="text" id="c" maxlength="6" inputmode="latin" placeholder="e.g. AD" aria-label="Evidence C" />
+              </label>
+              <label>Evidence D
+                <input type="text" id="d" maxlength="6" inputmode="latin" placeholder="e.g. LX" aria-label="Evidence D" />
+              </label>
+              <label>Evidence E
+                <input type="text" id="e" maxlength="12" inputmode="latin" placeholder="e.g. UZKDMSHMD" aria-label="Evidence E" />
+              </label>
+
+              <div class="actions">
+                <button type="submit" id="submit">Decipher</button>
+                <button type="button" id="reset" class="secondary">Reset</button>
+              </div>
+
+              <div class="status" id="status" aria-live="polite"></div>
+
+              <div class="reveal" id="partial"> </div>
+
+              <div class="choice-wrap" id="choices" style="display:none">
+                <button type="button" id="yes" class="swap-fun">Yes</button>
+                <button type="button" id="no" class="swap-fun secondary">No</button>
+              </div>
+
+              <div class="protected" id="protected" aria-hidden="true">
+                <strong>Welcome — invitation unlocked!</strong>
+                <p class="small">You may now enter the main site or enjoy the reveal below.</p>
+                <p><a href="/" style="color:var(--accent);text-decoration:underline">Enter site</a></p>
+              </div>
+
+            </fieldset>
+          </form>
+        </aside>
+      </div>
+
+      <p class="small" style="margin-top:12px">This is a playful pre-landing puzzle. No personal data is collected.</p>
+    </main>
+  </div>
+
+  <script>
+    // Crimson Locket puzzle script
+    // Encoded answers (kept secret in text, but present in code per requirements)
+    const ENCODED = {
+      A: 'VHKK',
+      B: 'XNT',
+      C: 'AD',
+      D: 'LX',
+      E: 'UZKDMSHMD'
+    }
+
+    // Utility: normalize user input (strip whitespace, uppercase)
+    const norm = (s) => (s || '').toUpperCase().replace(/\s+/g, '')
+
+    // Shift each alphabetical letter forward by one (A->B, Z->A). Non-letters preserved.
+    function shiftForward(s){
+      return s.replace(/[A-Z]/g, ch => ch === 'Z' ? 'A' : String.fromCharCode(ch.charCodeAt(0)+1))
+    }
+
+    // DOM refs
+    const form = document.getElementById('puzzle-form')
+    const status = document.getElementById('status')
+    const partial = document.getElementById('partial')
+    const choices = document.getElementById('choices')
+    const yesBtn = document.getElementById('yes')
+    const noBtn = document.getElementById('no')
+    const protectedArea = document.getElementById('protected')
+
+    // Put focus nicely
+    document.getElementById('a').focus()
+
+    // When puzzle is already unlocked in localStorage, reveal protected content.
+    if(localStorage.getItem('crimson-unlocked') === '1'){
+      protectedArea.classList.add('visible')
+      choices.style.display = 'none'
+      partial.textContent = 'Invitation already unlocked — welcome back.'
+      partial.classList.add('visible')
+    }
+
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault()
+
+      // Read and normalize
+      const a = norm(document.getElementById('a').value)
+      const b = norm(document.getElementById('b').value)
+      const c = norm(document.getElementById('c').value)
+      const d = norm(document.getElementById('d').value)
+      const e = norm(document.getElementById('e').value)
+
+      const payload = {A:a,B:b,C:c,D:d,E:e}
+
+      // Validate: must exactly match encoded answers
+      let ok = true
+      for(const k of Object.keys(ENCODED)){
+        if(payload[k] !== ENCODED[k]){ ok = false; }
+      }
+
+      if(!ok){
+        status.textContent = 'Some answers are not quite right — examine the clues and try again.'
+        // add brief shake for the panel
+        form.classList.add('shake')
+        setTimeout(()=> form.classList.remove('shake'),420)
+        return
+      }
+
+      // If here, decode by shifting forward one char per instructions
+      const decodedWords = [shiftForward(ENCODED.A), shiftForward(ENCODED.B), shiftForward(ENCODED.C), shiftForward(ENCODED.D), shiftForward(ENCODED.E)]
+      const decodedSentence = decodedWords.map((w,i)=> i===0 ? w[0]+w.slice(1).toLowerCase() : w.toLowerCase()).join(' ')
+      // At this step the decodedSentence is "Will you be my valentine" (capitalization similar)
+
+      // First show the intentional ellipsis version: "Will you be my Val..."
+      const partialStr = decodedSentence.split(' ').slice(0,4).join(' ') + ' Val...'
+      partial.textContent = partialStr
+      partial.classList.add('visible')
+      status.textContent = ''
+
+      // After a brief pause reveal full message and show choices
+      setTimeout(()=>{
+        partial.textContent = decodedSentence.replace(/\bvalentine\b/i, 'Valentine?')
+        partial.classList.add('visible')
+        choices.style.display = 'flex'
+        // playful focus move
+        yesBtn.focus()
+      }, 900)
+
+    })
+
+    // Reset handler
+    document.getElementById('reset').addEventListener('click', ()=>{
+      form.reset(); status.textContent=''; partial.textContent=''; choices.style.display='none'; protectedArea.classList.remove('visible'); document.getElementById('a').focus(); localStorage.removeItem('crimson-unlocked')
+    })
+
+    // No button swap behavior — every click toggles the order of the two buttons
+    let swapped = false
+    noBtn.addEventListener('click', (ev)=>{
+      // Playful move — swap the order in the flex container
+      swapped = !swapped
+      choices.classList.toggle('swapped', swapped)
+      // small nudge animation
+      noBtn.animate([{transform:'translateY(0)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}],{duration:260,easing:'ease'})
+    })
+
+    // Yes: reveal protected area and persist unlock
+    yesBtn.addEventListener('click', ()=>{
+      protectedArea.classList.add('visible')
+      choices.style.display = 'none'
+      partial.textContent = 'Will you be my Valentine? — ❤️' // confirm
+      localStorage.setItem('crimson-unlocked','1')
+
+      // Optionally, smooth-scroll to the revealed content
+      protectedArea.scrollIntoView({behavior:'smooth',block:'center'})
+    })
+
+    // Accessibility: keyboard support — prevent user from tabbing to 'No' easily
+    // We still keep No accessible, but on click it will swap making it hard to activate repeatedly with mouse.
+
+    // Subtle preventive check: ignore whitespace-only entries
+    Array.from(document.querySelectorAll('input')).forEach(i=>{
+      i.addEventListener('input', ()=>{
+        i.value = i.value.toUpperCase().replace(/[^A-Z]/g, '')
+      })
+    })
+
+    // Keep code commented and readable — end of script
+  </script>
+</body>
+</html>

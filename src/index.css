@@ -1,0 +1,716 @@
+:root {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  color: #3b2a33;
+  background-color: #fff6fb;
+  --pink-100: #ffe3f0;
+  --pink-200: #ffc5df;
+  --pink-300: #f6a9ca;
+  --pink-500: #e476a9;
+  --cream: #fff9f2;
+  --cherry: #c64c7a;
+  --shadow: 0 20px 50px rgba(198, 76, 122, 0.18);
+  --page-bg:
+    radial-gradient(circle at 10% 10%, #ffeef8 0%, transparent 45%),
+    radial-gradient(circle at 90% 20%, #fff1f7 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, #ffe1ee 0%, transparent 45%),
+    linear-gradient(160deg, #fff9fc 0%, #ffe5f1 55%, #fff8f2 100%);
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(246, 169, 202, 0.5);
+  --accent: var(--cherry);
+  --text-muted: #6a4b58;
+  --chip-bg: var(--pink-100);
+}
+
+body[data-theme='batman'] {
+  color: #f2f5fb;
+  background-color: #0f121a;
+  --pink-100: #2f3645;
+  --pink-200: #3b4254;
+  --pink-300: #f7c948;
+  --pink-500: #fbdc6f;
+  --cream: #1a1f2b;
+  --cherry: #f7c948;
+  --shadow: 0 24px 60px rgba(10, 12, 18, 0.5);
+  --page-bg:
+    radial-gradient(circle at 10% 10%, #222736 0%, transparent 45%),
+    radial-gradient(circle at 90% 20%, #191e2a 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, #11151f 0%, transparent 45%),
+    linear-gradient(160deg, #0b0f17 0%, #151a25 55%, #0a0d14 100%);
+  --card-bg: rgba(18, 23, 34, 0.88);
+  --card-border: rgba(255, 215, 64, 0.35);
+  --accent: #f7c948;
+  --text-muted: #b9c0d4;
+  --chip-bg: rgba(255, 215, 64, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page-bg);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Fraunces', serif;
+  margin: 0 0 0.4rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 5rem;
+  display: grid;
+  gap: 2rem;
+  animation: fadeIn 0.9s ease;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.top-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.tag {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 28px;
+  padding: 1.8rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero {
+  grid-column: span 2;
+}
+
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 90px;
+  height: 140px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50% 50% 45% 45%;
+  border: 2px solid rgba(246, 169, 202, 0.4);
+  top: -70px;
+  box-shadow: 0 18px 32px rgba(231, 127, 171, 0.2);
+}
+
+body[data-theme='batman'] .hero::before,
+body[data-theme='batman'] .hero::after {
+  background: rgba(27, 33, 46, 0.9);
+  border-color: rgba(255, 215, 64, 0.35);
+  box-shadow: 0 18px 32px rgba(7, 9, 13, 0.55);
+}
+
+.hero::before {
+  left: 60px;
+  transform: rotate(-12deg);
+}
+
+.hero::after {
+  left: 150px;
+  transform: rotate(8deg);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.pill-row span {
+  background: var(--chip-bg);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.list li {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.list li span,
+.list li a {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.photo-card {
+  grid-column: span 2;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.photo {
+  background: var(--cream);
+  border-radius: 20px;
+  min-height: 180px;
+  display: grid;
+  gap: 0.6rem;
+  place-items: center;
+  padding: 0.9rem;
+  font-weight: 600;
+  color: #c46a92;
+  border: 1px dashed rgba(198, 76, 122, 0.3);
+  text-align: center;
+}
+
+body[data-theme='batman'] .photo {
+  color: #f7c948;
+  border-color: rgba(255, 215, 64, 0.35);
+}
+
+.photo img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid rgba(198, 76, 122, 0.2);
+}
+
+body[data-theme='batman'] .photo img {
+  border-color: rgba(255, 215, 64, 0.3);
+}
+
+.photo-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.photo-upload {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  padding: 0.45rem 0.8rem;
+  background: var(--pink-300);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.photo-upload input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+
+.calendar-card {
+  grid-column: span 2;
+}
+
+.calendar {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  padding: 1rem;
+  border: 1px solid rgba(246, 169, 202, 0.4);
+}
+
+body[data-theme='batman'] .calendar {
+  background: rgba(18, 23, 34, 0.75);
+  border-color: rgba(255, 215, 64, 0.35);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(32px, 1fr));
+  gap: 0.4rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.calendar-weekday {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.calendar-day {
+  padding: 0.45rem 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+}
+
+body[data-theme='batman'] .calendar-day {
+  background: rgba(27, 33, 46, 0.8);
+}
+
+.calendar-day.is-marked {
+  background: var(--pink-200);
+  border: 1px solid rgba(198, 76, 122, 0.4);
+}
+
+body[data-theme='batman'] .calendar-day.is-marked {
+  background: rgba(255, 215, 64, 0.25);
+  border-color: rgba(255, 215, 64, 0.5);
+}
+
+.milestone-form,
+.notes-form {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.milestone-list li {
+  align-items: start;
+}
+
+.chat-card {
+  grid-column: span 2;
+}
+
+.chat-window {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(246, 169, 202, 0.4);
+}
+
+body[data-theme='batman'] .chat-window {
+  background: rgba(18, 23, 34, 0.7);
+  border-color: rgba(255, 215, 64, 0.35);
+}
+
+.chat-bubble {
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(246, 169, 202, 0.4);
+  display: grid;
+  gap: 0.35rem;
+}
+
+body[data-theme='batman'] .chat-bubble {
+  background: rgba(27, 33, 46, 0.9);
+  border-color: rgba(255, 215, 64, 0.35);
+}
+
+.chat-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
+
+.chat-input {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.8rem;
+}
+
+.suggestion-card {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.suggestion-card textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.suggestion-card button {
+  justify-self: start;
+}
+
+.notes-form {
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+}
+
+.notes-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.notes-form button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.reminder-card,
+.suggestion-card,
+.notes-card {
+  grid-column: span 2;
+}
+
+.reminder-list li {
+  align-items: start;
+}
+
+.notes-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.note-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  padding: 1rem;
+  border: 1px solid rgba(246, 169, 202, 0.4);
+  display: grid;
+  gap: 0.5rem;
+}
+
+body[data-theme='batman'] .note-card {
+  background: rgba(18, 23, 34, 0.85);
+  border-color: rgba(255, 215, 64, 0.35);
+}
+
+.note-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+textarea {
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(198, 76, 122, 0.3);
+  font-size: 1rem;
+  background: white;
+  font-family: inherit;
+}
+
+body[data-theme='batman'] textarea {
+  background: rgba(18, 23, 34, 0.9);
+  border-color: rgba(255, 215, 64, 0.35);
+  color: #f2f5fb;
+}
+
+.auth {
+  max-width: 480px;
+  justify-self: center;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+input {
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(198, 76, 122, 0.3);
+  font-size: 1rem;
+  background: white;
+}
+
+body[data-theme='batman'] input {
+  background: rgba(18, 23, 34, 0.9);
+  border-color: rgba(255, 215, 64, 0.35);
+  color: #f2f5fb;
+}
+
+.actions {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+button {
+  border: none;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  background: var(--pink-300);
+  color: #3b2a33;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 24px rgba(228, 118, 169, 0.25);
+}
+
+body[data-theme='batman'] button {
+  color: #0b0f17;
+  box-shadow: 0 16px 30px rgba(7, 9, 13, 0.6);
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button.ghost {
+  background: transparent;
+  border: 1px solid rgba(198, 76, 122, 0.4);
+  box-shadow: none;
+  color: inherit;
+}
+
+body[data-theme='batman'] button.ghost {
+  border-color: rgba(255, 215, 64, 0.5);
+}
+
+a.ghost.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 1px solid rgba(198, 76, 122, 0.4);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  color: inherit;
+}
+
+body[data-theme='batman'] a.ghost.link-button {
+  border-color: rgba(255, 215, 64, 0.5);
+}
+
+.message {
+  margin: 0.5rem 0 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.fine-print {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+}
+
+.callout {
+  background: var(--pink-100);
+  padding: 1rem;
+  border-radius: 18px;
+  margin-top: 1rem;
+}
+
+.callout ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+code {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.1rem 0.3rem;
+  border-radius: 6px;
+}
+
+body[data-theme='batman'] code {
+  background: rgba(255, 215, 64, 0.15);
+}
+
+.invite-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 227, 240, 0.9), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(255, 241, 247, 0.9), transparent 45%),
+    linear-gradient(160deg, #fff9fc 0%, #ffe5f1 55%, #fff8f2 100%);
+  z-index: 1200;
+  padding: 20px;
+}
+
+.invite-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 2.2rem 2rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  border: 2px solid rgba(246, 169, 202, 0.55);
+  box-shadow: 0 30px 80px rgba(198, 76, 122, 0.25);
+  position: relative;
+}
+
+body[data-theme='batman'] .invite-card {
+  background: rgba(18, 23, 34, 0.95);
+}
+
+.invite-card::before,
+.invite-card::after {
+  content: '';
+  position: absolute;
+  width: 90px;
+  height: 130px;
+  background: rgba(255, 227, 240, 0.7);
+  border-radius: 50% 50% 45% 45%;
+  border: 2px solid rgba(246, 169, 202, 0.4);
+  top: -60px;
+}
+
+.invite-card::before {
+  left: 40px;
+  transform: rotate(-12deg);
+}
+
+.invite-card::after {
+  left: 120px;
+  transform: rotate(8deg);
+}
+
+.choice-wrap {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.choice-wrap.swapped {
+  flex-direction: row-reverse;
+}
+
+.choice-wrap .yes {
+  background: var(--pink-300);
+}
+
+.edit-bar {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cat-station {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: grid;
+  gap: 0.8rem;
+  z-index: 860;
+}
+
+.cat-spot {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  border-radius: 18px;
+  padding: 0.8rem 1rem;
+  background: var(--card-bg);
+  border: 1px dashed var(--card-border);
+  box-shadow: var(--shadow);
+  color: inherit;
+}
+
+.cat-spot-title {
+  font-weight: 700;
+}
+
+.cat-spot-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+body[data-theme='batman'] .cat-spot {
+  border-color: rgba(255, 215, 64, 0.5);
+}
+
+@media (max-width: 900px) {
+  .top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero,
+  .photo-card,
+  .calendar-card,
+  .chat-card,
+  .reminder-card,
+  .suggestion-card,
+  .notes-card {
+    grid-column: span 1;
+  }
+
+  .notes-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .cat-station {
+    right: 16px;
+    bottom: 16px;
+  }
+}
