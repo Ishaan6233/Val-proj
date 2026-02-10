@@ -107,6 +107,10 @@ const GAME_STORAGE_KEY = "bunny-hub-games";
 const LINK_STORAGE_KEY = "bunny-hub-links";
 const ANIME_STORAGE_KEY = "bunny-hub-anime";
 const MOVIE_STORAGE_KEY = "bunny-hub-movies";
+const VIBE_STORAGE_KEY = "bunny-hub-vibe";
+const VIBE_TAGS_STORAGE_KEY = "bunny-hub-vibe-tags";
+const VIBE_HISTORY_STORAGE_KEY = "bunny-hub-vibe-history";
+const VIBE_TAG_HISTORY_STORAGE_KEY = "bunny-hub-vibe-tag-history";
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -179,36 +183,8 @@ export default function App() {
     localStorage.setItem("pet-type", petType);
   }, [petType]);
 
-  // Crimson Locket puzzle lock: only for a specific user by email
-  const [locked, setLocked] = useState<boolean>(false);
-  const [noSwapped, setNoSwapped] = useState(false);
-
-  useEffect(() => {
-    const targets = [
-      "aaditirammohan9@gmail.com",
-      "f20220263@dubai.bits-pilani.ac.in",
-    ];
-    const unlocked = !!localStorage.getItem("crimson-unlocked");
-    const email = session?.user?.email?.toLowerCase() ?? "";
-    if (targets.includes(email) && !unlocked) {
-      setLocked(true);
-    } else {
-      setLocked(false);
-    }
-  }, [session]);
-
-  const handleUnlock = () => {
-    setLocked(false);
-  };
-
-  const handleYesInvite = () => {
-    localStorage.setItem("crimson-unlocked", "1");
-    handleUnlock();
-  };
-
-  useEffect(() => {
-    document.body.style.overflow = locked ? "hidden" : "auto";
-  }, [locked]);
+  // Invitations disabled
+  const locked = false;
 
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -221,6 +197,9 @@ export default function App() {
   const [chatMessage, setChatMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatStatus, setChatStatus] = useState("");
+  const [chatEffect, setChatEffect] = useState<string | null>(null);
+  const [lastEffectId, setLastEffectId] = useState<string | null>(null);
+  const [chatFilterHours, setChatFilterHours] = useState(8);
   const [suggestionText, setSuggestionText] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [reminderTitle, setReminderTitle] = useState("");
@@ -242,6 +221,19 @@ export default function App() {
   const [newAnimeNote, setNewAnimeNote] = useState("");
   const [newMovieTitle, setNewMovieTitle] = useState("");
   const [newMovieNote, setNewMovieNote] = useState("");
+  const [vibeText, setVibeText] = useState(
+    "Pick a cozy co-op, drop a new link, or pin the cutest photo. Everything in one bunny-soft home base.",
+  );
+  const [vibeDraft, setVibeDraft] = useState("");
+  const [vibeHistory, setVibeHistory] = useState<string[]>([]);
+  const [vibeTagHistory, setVibeTagHistory] = useState<string[]>([]);
+  const [vibeTagDrafts, setVibeTagDrafts] = useState<string[]>([]);
+  const [vibeTags, setVibeTags] = useState<string[]>([
+    "Snacks",
+    "Candles",
+    "Lo-fi",
+    "Tea",
+  ]);
 
   const allowedEmails = useMemo(
     () => ALLOWED_EMAILS.map((value) => value.trim().toLowerCase()),
@@ -252,9 +244,9 @@ export default function App() {
     ? allowedEmails.includes(session.user.email.toLowerCase())
     : false;
   const chatWithLabel =
-    session?.user?.email?.toLowerCase() === "aaditirammohan9@gmail.com"
-      ? "Chat with Ishaan"
-      : "Chat with Aditi";
+    session?.user?.email?.toLowerCase() === "ishhaan6233@gmail.com"
+      ? "Chat with Aaditi"
+      : "Chat with Ishaan";
 
   useEffect(() => {
     if (!supabase) {
@@ -281,7 +273,8 @@ export default function App() {
   }, [isAllowed, session]);
 
   useEffect(() => {
-    if (!supabase || !session) {
+    const sb = supabase;
+    if (!sb || !session) {
       setChatMessages([]);
       return;
     }
@@ -291,7 +284,7 @@ export default function App() {
     setChatStatus("");
 
     const loadMessages = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("messages")
         .select("id, sender_email, message, created_at")
         .order("created_at", { ascending: true })
@@ -301,7 +294,22 @@ export default function App() {
         setChatStatus("Unable to load messages.");
         return;
       }
-      setChatMessages((data as ChatMessage[]) || []);
+      const nextMessages = (data as ChatMessage[]) || [];
+      setChatMessages(nextMessages);
+
+      const currentEmail = session?.user?.email?.toLowerCase();
+      const lastSpecial = [...nextMessages]
+        .reverse()
+        .find(
+          (item) =>
+            item.sender_email?.toLowerCase() !== currentEmail &&
+            (item.message.startsWith("💋") || item.message.startsWith("🤗")),
+        );
+      if (lastSpecial && lastSpecial.id !== lastEffectId) {
+        setLastEffectId(lastSpecial.id);
+        setChatEffect(lastSpecial.message);
+        window.setTimeout(() => setChatEffect(null), 2200);
+      }
     };
 
     loadMessages();
@@ -311,7 +319,7 @@ export default function App() {
       active = false;
       if (timer) window.clearInterval(timer);
     };
-  }, [session]);
+  }, [session, lastEffectId]);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -437,6 +445,52 @@ export default function App() {
         // Ignore malformed storage
       }
     }
+
+    const rawVibe = window.localStorage.getItem(VIBE_STORAGE_KEY);
+    if (rawVibe) {
+      setVibeText(rawVibe);
+    }
+
+    const rawVibeHistory = window.localStorage.getItem(
+      VIBE_HISTORY_STORAGE_KEY,
+    );
+    if (rawVibeHistory) {
+      try {
+        const parsed = JSON.parse(rawVibeHistory) as string[];
+        if (Array.isArray(parsed)) {
+          setVibeHistory(parsed);
+        }
+      } catch {
+        // Ignore malformed storage
+      }
+    }
+
+    const rawVibeTags = window.localStorage.getItem(VIBE_TAGS_STORAGE_KEY);
+    if (rawVibeTags) {
+      try {
+        const parsed = JSON.parse(rawVibeTags) as string[];
+        if (Array.isArray(parsed) && parsed.length) {
+          setVibeTags(parsed);
+          setVibeTagDrafts(parsed);
+        }
+      } catch {
+        // Ignore malformed storage
+      }
+    }
+
+    const rawTagHistory = window.localStorage.getItem(
+      VIBE_TAG_HISTORY_STORAGE_KEY,
+    );
+    if (rawTagHistory) {
+      try {
+        const parsed = JSON.parse(rawTagHistory) as string[];
+        if (Array.isArray(parsed)) {
+          setVibeTagHistory(parsed);
+        }
+      } catch {
+        // Ignore malformed storage
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -488,6 +542,28 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem(MOVIE_STORAGE_KEY, JSON.stringify(movieList));
   }, [movieList]);
+
+  useEffect(() => {
+    window.localStorage.setItem(VIBE_STORAGE_KEY, vibeText);
+  }, [vibeText]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      VIBE_HISTORY_STORAGE_KEY,
+      JSON.stringify(vibeHistory),
+    );
+  }, [vibeHistory]);
+
+  useEffect(() => {
+    window.localStorage.setItem(VIBE_TAGS_STORAGE_KEY, JSON.stringify(vibeTags));
+  }, [vibeTags]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      VIBE_TAG_HISTORY_STORAGE_KEY,
+      JSON.stringify(vibeTagHistory),
+    );
+  }, [vibeTagHistory]);
 
   const handleSignIn = async () => {
     setMessage("");
@@ -583,6 +659,11 @@ export default function App() {
     await supabase.auth.signOut();
   };
 
+  const handleDeleteSession = async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+  };
+
   const handlePhotoUpload = (index: number, file?: File) => {
     if (!file) return;
     const reader = new FileReader();
@@ -638,7 +719,7 @@ export default function App() {
       message: messageText,
     });
     if (error) {
-      setChatStatus("Failed to send message.");
+      setChatStatus(error.message || "Failed to send message.");
       setChatMessage(messageText);
     }
   };
@@ -755,6 +836,37 @@ export default function App() {
     setMovieList((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const handleTagDraftChange = (index: number, value: string) => {
+    setVibeTagDrafts((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handleCommitTag = (index: number) => {
+    const next = (vibeTagDrafts[index] || "").trim();
+    if (!next) return;
+    setVibeTags((prev) => {
+      const updated = [...prev];
+      updated[index] = next;
+      return updated;
+    });
+    setVibeTagHistory((prev) =>
+      [next, ...prev.filter((item) => item !== next)].slice(0, 12),
+    );
+  };
+
+  const handleSaveVibe = () => {
+    const next = vibeDraft.trim();
+    if (!next) return;
+    setVibeText(next);
+    setVibeHistory((prev) =>
+      [next, ...prev.filter((item) => item !== next)].slice(0, 12),
+    );
+    setVibeDraft("");
+  };
+
   const handleToggleTheme = () => {
     setTheme((prev) => (prev === "bunny" ? "batman" : "bunny"));
   };
@@ -764,6 +876,122 @@ export default function App() {
   const monthLabel = today.toLocaleString("default", { month: "long" });
   const { pathname } = useLocation();
   const isSettings = pathname.startsWith("/settings");
+  const isChatPage = pathname.startsWith("/chat");
+
+  const handleSendQuick = async (text: string) => {
+    if (!text.trim()) return;
+    if (!supabase || !session?.user?.email) {
+      setChatStatus("Sign in to chat.");
+      return;
+    }
+    setChatStatus("");
+    const { error } = await supabase.from("messages").insert({
+      sender_email: session.user.email,
+      message: text,
+    });
+    if (error) {
+      setChatStatus(error.message || "Failed to send message.");
+    } else {
+      setChatEffect(text);
+      window.setTimeout(() => setChatEffect(null), 2200);
+    }
+  };
+
+  const renderChatArea = (fullScreen = false) => (
+    <div className={`card chat-card${fullScreen ? " chat-full" : ""}`}>
+      <div className="chat-header">
+        <h3>{chatWithLabel}</h3>
+        <div className="chat-filters">
+          <label>
+            Show
+            <select
+              value={chatFilterHours}
+              onChange={(event) => setChatFilterHours(Number(event.target.value))}
+            >
+              <option value={8}>Last 8 hours</option>
+              <option value={24}>Last 24 hours</option>
+              <option value={168}>Last 7 days</option>
+              <option value={0}>All messages</option>
+            </select>
+          </label>
+        </div>
+        {fullScreen ? (
+          <Link className="ghost link-button" to="/">
+            Back
+          </Link>
+        ) : (
+          <Link className="ghost link-button" to="/chat">
+            Full screen
+          </Link>
+        )}
+      </div>
+      {fullScreen && chatEffect ? (
+        <div className="chat-effect" aria-live="polite">
+          {chatEffect}
+        </div>
+      ) : null}
+      <div className="chat-window">
+        {chatMessages
+          .filter((messageItem) => {
+            if (chatFilterHours === 0) return true;
+            const messageTime = new Date(messageItem.created_at).getTime();
+            const cutoff = Date.now() - chatFilterHours * 60 * 60 * 1000;
+            return messageTime >= cutoff;
+          })
+          .map((messageItem) => (
+          <div key={messageItem.id} className="chat-bubble">
+            <div>
+              <strong>
+                {messageItem.sender_email === session?.user?.email
+                  ? "You"
+                  : chatWithLabel.replace("Chat with ", "")}
+              </strong>
+              <span className="chat-time">
+                {new Date(messageItem.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+            <p>{messageItem.message}</p>
+          </div>
+        ))}
+      </div>
+      {chatStatus ? <p className="message">{chatStatus}</p> : null}
+      <div className="chat-input">
+        <input
+          type="text"
+          placeholder="Type a message..."
+          value={chatMessage}
+          onChange={(event) => setChatMessage(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              handleSendMessage();
+            }
+          }}
+        />
+        <button type="button" onClick={handleSendMessage}>
+          Send
+        </button>
+      </div>
+      {fullScreen ? (
+        <div className="chat-actions">
+          <button
+            type="button"
+            onClick={() => handleSendQuick("💋 Sending a kiss")}
+          >
+            Send kiss
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendQuick("🤗 Sending a hug")}
+          >
+            Send hug
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
 
   if (!hasSupabaseEnv) {
     return (
@@ -841,27 +1069,7 @@ export default function App() {
 
   if (isSettings) {
     return (
-      <div className={`page ${locked ? "locked" : ""}`}>
-        {locked ? (
-          <div className="invite-overlay">
-            <div className="invite-card">
-              <h2>Will you be my Valentines?</h2>
-              <p>Tap yes to accept the invitation.</p>
-              <div className={`choice-wrap ${noSwapped ? "swapped" : ""}`}>
-                <button type="button" className="yes" onClick={handleYesInvite}>
-                  Yes
-                </button>
-                <button
-                  type="button"
-                  className="no secondary"
-                  onClick={() => setNoSwapped((s) => !s)}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
+      <div className="page">
         <header className="top">
           <div>
             <p className="tag">Preferences</p>
@@ -872,6 +1080,9 @@ export default function App() {
             <Link className="ghost link-button" to="/">
               Back
             </Link>
+            <button className="ghost" onClick={handleDeleteSession}>
+              Delete session
+            </button>
           </div>
         </header>
         <section className="grid">
@@ -887,28 +1098,35 @@ export default function App() {
     );
   }
 
+  if (isChatPage) {
+    return (
+      <div className="page chat-page">
+        <header className="top">
+          <div>
+            <p className="tag">Messages</p>
+            <h1>Full Screen Chat</h1>
+            <p className="subtitle">Everything you say, in one cozy view.</p>
+          </div>
+          <div className="top-actions">
+            <Link className="ghost link-button" to="/">
+              Back
+            </Link>
+            <button className="ghost" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
+        </header>
+        <section className="grid single">
+          {renderChatArea(true)}
+        </section>
+        {petEnabled ? <Pet type={petType} hidden={!petEnabled} /> : null}
+      </div>
+    );
+  }
+
   return (
     <div className={`page ${locked ? "locked" : ""}`}>
-      {locked ? (
-        <div className="invite-overlay">
-          <div className="invite-card">
-            <h2>Will you be my Valentines?</h2>
-            <p>Tap yes to accept the invitation.</p>
-            <div className={`choice-wrap ${noSwapped ? "swapped" : ""}`}>
-              <button type="button" className="yes" onClick={handleYesInvite}>
-                Yes
-              </button>
-              <button
-                type="button"
-                className="no secondary"
-                onClick={() => setNoSwapped((s) => !s)}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {locked ? null : null}
       <header className="top">
         <div>
           <p className="tag">Welcome back</p>
@@ -931,14 +1149,74 @@ export default function App() {
       <section className="grid">
         <div className="card hero">
           <h2>Tonight's vibe</h2>
-          <p>
-            Pick a cozy co-op, drop a new link, or pin the cutest photo.
-            Everything in one bunny-soft home base.
-          </p>
+          <p>{vibeText}</p>
+          <div className="inline-form">
+            <input
+              type="text"
+              placeholder="Type a new vibe..."
+              value={vibeDraft}
+              onChange={(event) => setVibeDraft(event.target.value)}
+              list="vibe-history"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  handleSaveVibe();
+                }
+              }}
+            />
+            <datalist id="vibe-history">
+              {vibeHistory.map((item) => (
+                <option value={item} key={item} />
+              ))}
+            </datalist>
+            <button type="button" onClick={handleSaveVibe}>
+              Save vibe
+            </button>
+          </div>
           <div className="pill-row">
-            <span>Snacks</span>
-            <span>Candles</span>
-            <span>Lo-fi</span>
+            {vibeTags.map((tag, index) => (
+              <span key={`${tag}-${index}`}>
+                {index < 3 ? (
+                  <select
+                    value={vibeTagDrafts[index] ?? tag}
+                    onChange={(event) => {
+                      handleTagDraftChange(index, event.target.value);
+                      handleCommitTag(index);
+                    }}
+                    aria-label={`Tag ${index + 1}`}
+                  >
+                    {[tag, ...vibeTagHistory]
+                      .filter((item, idx, arr) => arr.indexOf(item) === idx)
+                      .map((item) => (
+                        <option value={item} key={item}>
+                          {item}
+                        </option>
+                      ))}
+                  </select>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      value={vibeTagDrafts[index] ?? tag}
+                      onChange={(event) =>
+                        handleTagDraftChange(index, event.target.value)
+                      }
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          handleCommitTag(index);
+                        }
+                      }}
+                      list={`vibe-tag-history-${index}`}
+                      aria-label={`Tag ${index + 1}`}
+                    />
+                    <datalist id={`vibe-tag-history-${index}`}>
+                      {vibeTagHistory.map((item) => (
+                        <option value={item} key={item} />
+                      ))}
+                    </datalist>
+                  </>
+                )}
+              </span>
+            ))}
           </div>
         </div>
 
@@ -1107,16 +1385,18 @@ export default function App() {
                   <span>{slot.label}</span>
                 )}
                 <div className="photo-actions">
-                  <label className="photo-upload">
-                    Upload
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) =>
-                        handlePhotoUpload(index, event.target.files?.[0])
-                      }
-                    />
-                  </label>
+                  {!slot.imageUrl ? (
+                    <label className="photo-upload">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) =>
+                          handlePhotoUpload(index, event.target.files?.[0])
+                        }
+                      />
+                    </label>
+                  ) : null}
                   {slot.imageUrl && editMode ? (
                     <button
                       className="ghost"
@@ -1217,46 +1497,7 @@ export default function App() {
           </ul>
         </div>
 
-        <div className="card chat-card">
-          <h3>{chatWithLabel}</h3>
-          <div className="chat-window">
-            {chatMessages.map((messageItem) => (
-              <div key={messageItem.id} className="chat-bubble">
-                <div>
-                  <strong>
-                    {messageItem.sender_email === session?.user?.email
-                      ? "You"
-                      : chatWithLabel.replace("Chat with ", "")}
-                  </strong>
-                  <span className="chat-time">
-                    {new Date(messageItem.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-                <p>{messageItem.message}</p>
-              </div>
-            ))}
-          </div>
-          {chatStatus ? <p className="message">{chatStatus}</p> : null}
-          <div className="chat-input">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              value={chatMessage}
-              onChange={(event) => setChatMessage(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  handleSendMessage();
-                }
-              }}
-            />
-            <button type="button" onClick={handleSendMessage}>
-              Send
-            </button>
-          </div>
-        </div>
+        {renderChatArea(false)}
 
         <div className="card suggestion-card">
           <h3>Suggestion box</h3>
